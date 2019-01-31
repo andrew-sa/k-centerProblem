@@ -1,4 +1,4 @@
-package custom.event;
+package custom.events;
 
 public interface ActiveChangeCentersNumberListener {
 

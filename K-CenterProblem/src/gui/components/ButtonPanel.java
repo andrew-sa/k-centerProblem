@@ -7,7 +7,7 @@ import javax.swing.JButton;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import custom.event.ActiveChangeCentersNumberListener;
+import custom.events.ActiveChangeCentersNumberListener;
 
 public class ButtonPanel extends JPanel implements ActiveChangeCentersNumberListener {
 
@@ -32,68 +32,68 @@ public class ButtonPanel extends JPanel implements ActiveChangeCentersNumberList
 	private void addButtonsListener()
 	{
 		buttonInsertK.addActionListener(new ActionListener()
-				{
+		{
 
-					@Override
-					public void actionPerformed(ActionEvent e)
-					{
-						int n = drawingArea.getCitiesNumber();
-						Integer[] choices = new Integer[n];
-						for (int i = 0; i < n; i++)
-						{
-							choices[i] = i + 1;
-						}
-						Object response = JOptionPane.showInputDialog(null, "Choose centers..", "Choose number of centers", JOptionPane.QUESTION_MESSAGE, null, choices, 1);
-						if (null != response)
-						{
-							buttonInsertK.setEnabled(false);
-							
-							if (buttonInsertK.getText().equals(CHANGED_TITLE_BUTTOM_K))
-							{
-								drawingArea.deleteSolution();
-							}
-							
-							k = (int) response;
-							System.out.println("Number of centers: " + k);
-							drawingArea.placeAlgorithmCenters(k);
-							
-//							buttonInsertUserCenters.setText("Insert your solution for " + k + " centers");
-//							buttonInsertK.setVisible(false);
-//							buttonInsertUserCenters.setEnabled(true);
-//							buttonInsertUserCenters.setVisible(true);
-							drawingArea.setDrawingAreaForUserCenters(k);
-						}
-					}
-			
-				});
-		
-//		buttonInsertUserCenters.addActionListener(new ActionListener()
-//				{
-//
-//					@Override
-//					public void actionPerformed(ActionEvent e)
-//					{
-//						buttonInsertUserCenters.setEnabled(false);
-//						drawingArea.setDrawingAreaForUserCenters(k);
-//					}
-//			
-//				});
-		
-		buttonReset.addActionListener(new ActionListener() 
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				int n = drawingArea.getCitiesNumber();
+				Integer[] choices = new Integer[n];
+				for (int i = 0; i < n; i++)
 				{
-			
-					@Override
-					public void actionPerformed(ActionEvent e)
+					choices[i] = i + 1;
+				}
+				Object response = JOptionPane.showInputDialog(null, "Choose number of centers:", "Choose centers..", JOptionPane.QUESTION_MESSAGE, null, choices, 1);
+				if (null != response)
+				{
+					buttonInsertK.setEnabled(false);
+					
+					if (buttonInsertK.getText().equals(CHANGED_TITLE_BUTTOM_K))
 					{
-						buttonInsertK.setText(INITIAL_TEXT_BUTTON_K);
-						buttonInsertK.setEnabled(true);
-//						buttonInsertK.setVisible(true);
-//						buttonInsertUserCenters.setEnabled(false);
-//						buttonInsertUserCenters.setVisible(false);
-						drawingArea.reset();
+						drawingArea.deleteSolution();
 					}
 					
-				});
+					k = (int) response;
+					System.out.println("Number of centers: " + k);
+					drawingArea.placeAlgorithmCenters(k);
+					
+//					buttonInsertUserCenters.setText("Insert your solution for " + k + " centers");
+//					buttonInsertK.setVisible(false);
+//					buttonInsertUserCenters.setEnabled(true);
+//					buttonInsertUserCenters.setVisible(true);
+					drawingArea.setDrawingAreaForUserCenters(k);
+				}
+			}
+	
+		});
+		
+//		buttonInsertUserCenters.addActionListener(new ActionListener()
+//		{
+//
+//			@Override
+//			public void actionPerformed(ActionEvent e)
+//			{
+//				buttonInsertUserCenters.setEnabled(false);
+//				drawingArea.setDrawingAreaForUserCenters(k);
+//			}
+//	
+//		});
+		
+		buttonReset.addActionListener(new ActionListener() 
+		{
+	
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				buttonInsertK.setText(INITIAL_TEXT_BUTTON_K);
+				buttonInsertK.setEnabled(true);
+//				buttonInsertK.setVisible(true);
+//				buttonInsertUserCenters.setEnabled(false);
+//				buttonInsertUserCenters.setVisible(false);
+				drawingArea.reset();
+			}
+			
+		});
 	}
 	
 	@Override

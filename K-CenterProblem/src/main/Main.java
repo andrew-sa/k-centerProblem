@@ -5,6 +5,7 @@ import java.awt.GraphicsEnvironment;
 import java.awt.Rectangle;
 
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 
 import gui.frames.ComputingFrame;
 import gui.frames.MainFrame;
@@ -33,6 +34,20 @@ public class Main {
 	{
 		JFrame.setDefaultLookAndFeelDecorated(true);
 		
+		double shapeSize = RECOMMENDED_SHAPE_SIZE;
+		
+		Integer[] choices = new Integer[MAX_SHAPE_SIZE - MIN_SHAPE_SIZE + 1];
+		for (int i = 0; i < choices.length; i++)
+		{
+			choices[i] = i + MIN_SHAPE_SIZE;
+		}
+		Object response = JOptionPane.showInputDialog(null, "Choose size of the cities/centers\n(RECOMMENDED SIZE: 14)", "Choose shape size", JOptionPane.QUESTION_MESSAGE, null, choices, 14);
+		if (null != response)
+		{
+			shapeSize = (int) response;
+		}
+		System.out.println("Shape size is: " + shapeSize);
+		
 //		Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
 //		double screenWidth = screenSize.getWidth();
 //		double screenHeight = screenSize.getHeight();
@@ -60,7 +75,7 @@ public class Main {
 		
 //		ComputingFrame computingFrame = new ComputingFrame(SHAPE_SIZE, CITY_COLOR, CENTER_COLOR, FIRST_CENTER_COLOR, USER_CENTER_COLOR);
 		ComputingFrame computingFrame = new ComputingFrame(CITY_COLOR, CENTER_COLOR, FIRST_CENTER_COLOR, USER_CENTER_COLOR);
-		MainFrame mainFrame = new MainFrame(SHAPE_SIZE, computingFrame, CITY_COLOR, CENTER_COLOR, FIRST_CENTER_COLOR, USER_CENTER_COLOR);
+		MainFrame mainFrame = new MainFrame(shapeSize, computingFrame, CITY_COLOR, CENTER_COLOR, FIRST_CENTER_COLOR, USER_CENTER_COLOR);
 		
 		mainFrame.setTitle("k-center problem");
 		mainFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -81,7 +96,9 @@ public class Main {
 		computingFrame.setVisible(true);
 	}
 	
-	private static final double SHAPE_SIZE = 14;
+	private static final double RECOMMENDED_SHAPE_SIZE = 14;
+	private static final int MIN_SHAPE_SIZE = 10;
+	private static final int MAX_SHAPE_SIZE = 20;
 //	private static final int MAIN_FRAME_WIDTH = 1000;
 //	private static final int MAIN_FRAME_HEIGHT = 700;
 //	private static final int COMPUTING_FRAME_WIDTH = 400;

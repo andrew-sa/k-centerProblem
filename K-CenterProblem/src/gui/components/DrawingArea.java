@@ -6,6 +6,7 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Random;
@@ -13,56 +14,15 @@ import java.util.Random;
 import javax.swing.BorderFactory;
 import javax.swing.JPanel;
 
-import custom.event.ActiveChangeCentersNumberListener;
+import custom.events.ActiveChangeCentersNumberListener;
 import gui.frames.ComputingFrame;
 import places.City;
 import places.UserCenter;
+import places.exceptions.DuplicatePlaceException;
+import places.exceptions.IllegalPositionException;
 
 public class DrawingArea extends JPanel {
 
-//	public DrawingArea(double citySize, ComputingFrame computingFrame) /* OLD CONSTRUCTOR */
-//	{
-//		this.shapeSize = citySize;
-//		this.computingFrame = computingFrame;
-//		
-////		System.out.println(this.getWidth());
-////		setBackground(new Color(245, 245, 240)); 	//OLD
-////		setBackground(new Color(255, 255, 255)); 	//OLD
-//		setBackground(new Color(215, 215, 193));
-//		setBorder(BorderFactory.createLineBorder(Color.black));
-//		cityColor = new Color(0, 51, 102);
-////		centerColor = new Color(204, 0, 0); 	//OLD
-//		centerColor = new Color(179, 0, 0);
-////		firstCenterColor = new Color(255, 102, 102); 	//OLD
-//		firstCenterColor = new Color(255, 26, 26);
-//		setNumberColor();
-//		userCenterColor = new Color(255, 255, 0);
-//		numberUserCenterColor = new Color(0, 51, 0);
-//		
-//		X_SIZE = 0;
-//		Y_SIZE = 0;
-//		
-////		this.citySize = citySize;
-////		halfCitySize = this.citySize / 2;
-//		cities = new ArrayList<>();
-//		citiesCenters = new ArrayList<>();
-////		numCities = 0;
-////		calculateHalfCitySize(this.citySize);
-//		userCenters = new ArrayList<>();
-//		numberRemaningUserCenter = 0;
-//		indexUserCenterToMove = -1;
-//		
-//		vectorsDistance = new HashMap<>();
-//		vectorsDistanceUserCenter = new HashMap<>();
-//		
-//		lowerBoundOptimalValue = -1;
-////		goodGap = -1;
-//		
-//		listeners = new ArrayList<>();
-//		
-//		setAlgorithmMouseListener();
-//	}
-	
 	public DrawingArea(double citySize, ComputingFrame computingFrame, Color cityColor, Color centerColor,
 			Color firstCenterColor, Color userCenterColor)
 	{
@@ -83,9 +43,13 @@ public class DrawingArea extends JPanel {
 		
 		cities = new ArrayList<>();
 		citiesCenters = new ArrayList<>();
+		indexCityToMove = -1;
+		draggedCity = null;
+		
 		userCenters = new ArrayList<>();
 		numberRemaningUserCenter = 0;
 		indexUserCenterToMove = -1;
+		draggedUserCenter = null;
 		
 		vectorsDistance = new HashMap<>();
 		vectorsDistanceUserCenter = new HashMap<>();
@@ -120,14 +84,17 @@ public class DrawingArea extends JPanel {
 		
 		cities = new ArrayList<>();
 		citiesCenters = new ArrayList<>();
+		indexCityToMove = -1;
+		draggedCity = null;
 		vectorsDistance = new HashMap<>();
 		
 		userCenters = new ArrayList<>();
 		numberRemaningUserCenter = 0;
 		indexUserCenterToMove = -1;
+		draggedUserCenter = null;
 		vectorsDistanceUserCenter = new HashMap<>();
 		
-		deleteMouseListeners();
+		deleteMouseAndMouseMotionListeners();
 		setAlgorithmMouseListener();
 		repaint();
 	}
@@ -135,104 +102,535 @@ public class DrawingArea extends JPanel {
 	public void deleteSolution()
 	{
 		citiesCenters = new ArrayList<>();
+		indexCityToMove = -1;
+		draggedCity = null;
 		
 		userCenters = new ArrayList<>();
 		numberRemaningUserCenter = 0;
 		indexUserCenterToMove = -1;
+		draggedUserCenter = null;
 		vectorsDistanceUserCenter = new HashMap<>();
 		
 		lowerBoundOptimalValue = -1;
 //		goodGap = -1;
 		
-		deleteMouseListeners();
+		deleteMouseAndMouseMotionListeners();
 		repaint();
 	}
 	
-	private void deleteMouseListeners()
+	private void deleteMouseAndMouseMotionListeners()
 	{
 		MouseListener[] mls = (MouseListener[]) (getListeners(MouseListener.class));
 		for (int i = 0; i < mls.length; i++)
 		{
 			removeMouseListener(mls[i]);
 		}
+		
+		MouseMotionListener[] mmls = (MouseMotionListener[]) (getListeners(MouseMotionListener.class));
+		for (int i = 0; i < mmls.length; i++)
+		{
+			removeMouseMotionListener(mmls[i]);
+		}
 	}
 	
+	
+	/* SETTER LISTENER */
 	private void setAlgorithmMouseListener()
 	{
 		lowerBoundOptimalValue = -1;
 //		goodGap = -1;
 		computingFrame.writeln(" > Place cities..");
 		computingFrame.writeln();
+		
 		addMouseListener(new MouseListener()
+		{
+	
+			@Override
+			public void mouseClicked(MouseEvent event)
+			{
+//				System.out.println(event.getX() + ", " + event.getY());
+				double x = event.getX();
+				double y = event.getY();
+				City city = new City(x, y, shapeSize, X_SIZE, Y_SIZE);
+				try
 				{
+					addNewCity(city);
+				}
+				catch (IllegalPositionException e)
+				{
+//					e.printStackTrace();
+					computingFrame.writeln(" > Illegal position.");
+				}
+				catch (DuplicatePlaceException e)
+				{
+//					e.printStackTrace();
+					computingFrame.writeln(" > In this position a city is already present.");
+				}
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent event)
+			{
+				int x = event.getX();
+				int y = event.getY();
+				System.out.println("PRESSED HERE: " + x + ", " + y);
+				getCityToMove(x, y);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent event)
+			{
+				int x = event.getX();
+				int y = event.getY();
+				System.out.println("RELEASED HERE: " + x + ", " + y);
+				try
+				{
+					moveCityTo(x, y);
+				}
+				catch (IllegalPositionException e)
+				{
+//					e.printStackTrace();
+					computingFrame.writeln(" > Illegal position.");
+					repaint();
+				}
+				catch (DuplicatePlaceException e)
+				{
+//					e.printStackTrace();
+					computingFrame.writeln(" > In this position a city is already present.");
+					repaint();
+				}
+				finally
+				{
+					indexCityToMove = -1;
+				}
+			}
 			
-					@Override
-					public void mouseClicked(MouseEvent event)
+		});
+		
+		addMouseMotionListener(new MouseMotionListener()
+		{
+			
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseDragged(MouseEvent event)
+			{
+				if (indexCityToMove != -1)
+				{
+					int x = event.getX();
+					int y = event.getY();
+					System.out.println("DRAGGED HERE: " + x + ", " + y);
+					draggedCity = new City(x, y, shapeSize, X_SIZE, Y_SIZE);
+					repaint();
+				}
+			}
+		});
+	}
+	
+	public void setDrawingAreaForUserCenters(int k)
+	{
+		deleteMouseAndMouseMotionListeners();
+		
+		numberRemaningUserCenter = k;
+		indexUserCenterToMove = -1;
+		computingFrame.writeln(" > Place your " + numberRemaningUserCenter + " centers");
+		setUserCenterMouseListeners();
+	}
+	
+	private void setUserCenterMouseListeners()
+	{
+		addMouseListener(new MouseListener()
+		{
+
+			@Override
+			public void mouseClicked(MouseEvent event)
+			{
+				if (numberRemaningUserCenter > 0)
+				{
+//					System.out.println("User center inserted, remaining " + numberRemaningUserCenter + " centers");
+					int x = event.getX();
+					int y = event.getY();
+					UserCenter newUserCenter = new UserCenter(x, y, shapeSize, X_SIZE, Y_SIZE);
+					addNewUserCenter(newUserCenter);
+				}
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent arg0) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mousePressed(MouseEvent event)
+			{
+				int x = event.getX();
+				int y = event.getY();
+				System.out.println("PRESSED HERE: " + x + ", " + y);
+				getUserCenterToMove(x, y);
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent event)
+			{
+				int x = event.getX();
+				int y = event.getY();
+				System.out.println("RELEASED HERE: " + x + ", " + y);
+				try
+				{
+					moveUserCenterTo(x, y);
+				}
+				catch (IllegalPositionException e)
+				{
+//					e.printStackTrace();
+					computingFrame.writeln(" > Illegal position.");
+					repaint();
+				}
+				catch (DuplicatePlaceException e)
+				{
+//					e.printStackTrace();
+					computingFrame.writeln(" > In this position a user center is already present.");
+					repaint();
+				}
+				finally
+				{
+					indexUserCenterToMove = -1;
+				}
+			}
+	
+		});
+		
+		addMouseMotionListener(new MouseMotionListener()
+		{
+		
+			@Override
+			public void mouseMoved(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseDragged(MouseEvent event)
+			{
+				if (indexUserCenterToMove != -1)
+				{
+					int x = event.getX();
+					int y = event.getY();
+					System.out.println("DRAGGED HERE: " + x + ", " + y);
+					draggedUserCenter = new UserCenter(x, y, shapeSize, X_SIZE, Y_SIZE);
+					repaint();
+				}
+			}
+		
+		});
+	}
+	
+	private void setMoveCitiesAndCentersMouseListener()
+	{
+		addMouseListener(new MouseListener()
+		{
+		
+			@Override
+			public void mouseClicked(MouseEvent event) //Only city
+			{
+				double x = event.getX();
+				double y = event.getY();
+				City city = new City(x, y, shapeSize, X_SIZE, Y_SIZE);
+				try
+				{
+					addNewCity(city);
+					placeAlgorithmCenters(citiesCenters.size());
+					calculateUserSolutionValue();
+					computingFrame.writeln(" > Try to move centers to improve your solution. Otherwise, you can move the cities or add others.");
+				}
+				catch (IllegalPositionException e)
+				{
+//					e.printStackTrace();
+					computingFrame.writeln(" > Illegal position.");
+				}
+				catch (DuplicatePlaceException e)
+				{
+//					e.printStackTrace();
+					computingFrame.writeln(" > In this position a city is already present.");
+				}
+			}
+			
+			@Override
+			public void mousePressed(MouseEvent event)
+			{
+				int x = event.getX();
+				int y = event.getY();
+				System.out.println("PRESSED HERE: " + x + ", " + y);
+				boolean foundUserCenterToMove = getUserCenterToMove(x, y);
+				if (!foundUserCenterToMove)
+				{
+					getCityToMove(x, y);
+				}
+				
+			}
+		
+			@Override
+			public void mouseReleased(MouseEvent event)
+			{
+				int x = event.getX();
+				int y = event.getY();
+				System.out.println("RELEASED HERE: " + x + ", " + y);
+				if (indexUserCenterToMove >= 0)
+				{
+					try
 					{
-//						System.out.println(event.getX() + ", " + event.getY());
-//						City city = new City(event.getX(), event.getY(), citySize, AREA_SIZE);
-						double x = event.getX();
-						double y = event.getY();
-						City city = new City(x, y, shapeSize, X_SIZE, Y_SIZE);
-						if (city.areGoodCoordinates() && !cities.contains(city))
-						{
-							cities.add(city);
-							calculateNewestDistances(city);
-							repaint();
-						}
-						
+						moveUserCenterTo(x, y);
 					}
-
-					private void calculateNewestDistances(City newCity)
+					catch (IllegalPositionException e)
 					{
-						ArrayList<Double> newCityDist = new ArrayList<>();
-						double x1 = newCity.getCenterX();
-						double y1 = newCity.getCenterY();
-						for (City c: cities)
-						{
-							double x2 = c.getCenterX();
-							double y2 = c.getCenterY();
-							double hypotenuse = Math.sqrt(Math.pow(Math.abs(x1 - x2), 2) + Math.pow(Math.abs(y1 - y2), 2));
-							newCityDist.add(hypotenuse);
-							if (!c.equals(newCity))
-							{
-								vectorsDistance.get(c).add(hypotenuse);
-							}
-						}
-						vectorsDistance.put(newCity, newCityDist);
-						System.out.println(vectorsDistance);
+//						e.printStackTrace();
+						computingFrame.writeln(" > Illegal position.");
+						repaint();
 					}
-
-					@Override
-					public void mouseEntered(MouseEvent arg0) {
-						// TODO Auto-generated method stub
-						
+					catch (DuplicatePlaceException e)
+					{
+//						e.printStackTrace();
+						computingFrame.writeln(" > In this position a user center is already present.");
+						repaint();
 					}
-
-					@Override
-					public void mouseExited(MouseEvent arg0) {
-						// TODO Auto-generated method stub
-						
+					finally
+					{
+						indexUserCenterToMove = -1;
 					}
-
-					@Override
-					public void mousePressed(MouseEvent arg0) {
-						// TODO Auto-generated method stub
-						
+				}
+				else if (indexCityToMove >= 0)
+				{
+					try
+					{
+						moveCityTo(x, y);
+						placeAlgorithmCenters(citiesCenters.size());
+						calculateUserSolutionValue();
+						computingFrame.writeln(" > Try to move centers to improve your solution. Otherwise, you can move the cities or add others.");
 					}
-
-					@Override
-					public void mouseReleased(MouseEvent arg0) {
-						// TODO Auto-generated method stub
-						
+					catch (IllegalPositionException e)
+					{
+//						e.printStackTrace();
+						computingFrame.writeln(" > Illegal position.");
+						repaint();
 					}
-					
-				});
+					catch (DuplicatePlaceException e)
+					{
+//						e.printStackTrace();
+						computingFrame.writeln(" > In this position a city is already present.");
+						repaint();
+					}
+					finally
+					{
+						indexCityToMove = -1;
+					}
+				}
+			}
+			
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+			
+		});
+		
+		addMouseMotionListener(new MouseMotionListener()
+		{
+		
+			@Override
+			public void mouseMoved(MouseEvent e)
+			{
+				// TODO Auto-generated method stub
+				
+			}
+			
+			@Override
+			public void mouseDragged(MouseEvent event)
+			{
+				if (indexCityToMove != -1)
+				{
+					int x = event.getX();
+					int y = event.getY();
+					System.out.println("DRAGGED HERE: " + x + ", " + y);
+					draggedCity = new City(x, y, shapeSize, X_SIZE, Y_SIZE);
+					repaint();
+				}
+				else if (indexUserCenterToMove != -1)
+				{
+					int x = event.getX();
+					int y = event.getY();
+					System.out.println("DRAGGED HERE: " + x + ", " + y);
+					draggedUserCenter = new UserCenter(x, y, shapeSize, X_SIZE, Y_SIZE);
+					repaint();
+				}
+			}
+			
+		});
+	} 	//END SETTERS LISTENER
+	
+	/* METHODS USED BY MOUSE LISTENERS */
+	private void addNewCity(City city) throws IllegalPositionException, DuplicatePlaceException
+	{
+		if (!city.areGoodCoordinates())
+		{
+			throw new IllegalPositionException();
+		}
+		else if (cities.contains(city))
+		{
+			throw new DuplicatePlaceException();
+		}
+		else
+		{
+			cities.add(city);
+			calculateNewestDistances(city);
+			repaint();
+		}
+	}
+	
+	private boolean getCityToMove(double x, double y)
+	{
+		boolean found = false;
+		indexCityToMove = -1;
+		int i = 0;
+		while (i < cities.size() && indexCityToMove == -1)
+		{
+			if (cities.get(i).getShape().contains(x, y))
+			{
+				indexCityToMove = i;
+				found = true;
+			}
+			i++;
+		}
+		return found;
+	}
+	
+	private void moveCityTo(double x, double y) throws IllegalPositionException, DuplicatePlaceException
+	{
+		draggedCity = null;
+		if (indexCityToMove >= 0)
+		{
+			ArrayList<City> otherCities = (ArrayList<City>) cities.clone();
+			otherCities.remove(indexCityToMove);
+			cities.get(indexCityToMove).changePosition(x, y, otherCities);
+			System.out.println("BEFORE MOVE, vectors distance size: " + vectorsDistance.size());
+			calculateMovedCityDistances();
+			System.out.println("AFTER MOVE, vectors distance size: " + vectorsDistance.size());
+			repaint();
+		}
+	}
+	
+	private void calculateNewestDistances(City newCity)
+	{
+		ArrayList<Double> newCityDist = new ArrayList<>();
+		double x1 = newCity.getCenterX();
+		double y1 = newCity.getCenterY();
+		for (City c: cities)
+		{
+			double x2 = c.getCenterX();
+			double y2 = c.getCenterY();
+			double hypotenuse = Math.sqrt(Math.pow(Math.abs(x1 - x2), 2) + Math.pow(Math.abs(y1 - y2), 2));
+			newCityDist.add(hypotenuse);
+			if (!c.equals(newCity))
+			{
+				vectorsDistance.get(c).add(hypotenuse);
+			}
+		}
+		vectorsDistance.put(newCity, newCityDist);
+		System.out.println(vectorsDistance);
+		if (userCenters.size() > 0)
+		{
+			calculateDistancesBetweenNewCityAndUserCenters(newCity);
+		}
+	}
+	
+	private void calculateDistancesBetweenNewCityAndUserCenters(City newCity)
+	{
+		double x1 = newCity.getCenterX();
+		double y1 = newCity.getCenterY();
+		for (UserCenter userCenter: userCenters)
+		{
+			double x2 = userCenter.getCenterX();
+			double y2 = userCenter.getCenterY();
+			double hypotenuse = Math.sqrt(Math.pow(Math.abs(x1 - x2), 2) + Math.pow(Math.abs(y1 - y2), 2));
+			vectorsDistanceUserCenter.get(userCenter).add(hypotenuse);
+		}
+	}
+	
+	private void calculateMovedCityDistances()
+	{
+		City movedCity = cities.get(indexCityToMove);
+		ArrayList<Double> movedCityDist = new ArrayList<>();
+		double x1 = movedCity.getCenterX();
+		double y1 = movedCity.getCenterY();
+		for (City c: cities)
+		{
+			if (!c.equals(movedCity))
+			{
+				double x2 = c.getCenterX();
+				double y2 = c.getCenterY();
+				double hypotenuse = Math.sqrt(Math.pow(Math.abs(x1 - x2), 2) + Math.pow(Math.abs(y1 - y2), 2));
+				movedCityDist.add(hypotenuse);
+				vectorsDistance.get(c).remove(indexCityToMove);
+				vectorsDistance.get(c).add(indexCityToMove, hypotenuse);
+			}
+			else
+			{
+				movedCityDist.add(Double.valueOf(0));
+			}
+		}
+		vectorsDistance.put(movedCity, movedCityDist);
+		System.out.println(vectorsDistance);
+		if (userCenters.size() > 0)
+		{
+			calculateDistancesBetweenMovedCityAndUserCenters(movedCity, indexCityToMove);
+		}
+	}
+	
+	private void calculateDistancesBetweenMovedCityAndUserCenters(City movedCity, int indexCityToMove)
+	{
+		double x1 = movedCity.getCenterX();
+		double y1 = movedCity.getCenterY();
+		for (UserCenter userCenter: userCenters)
+		{
+			double x2 = userCenter.getCenterX();
+			double y2 = userCenter.getCenterY();
+			double hypotenuse = Math.sqrt(Math.pow(Math.abs(x1 - x2), 2) + Math.pow(Math.abs(y1 - y2), 2));
+			vectorsDistanceUserCenter.get(userCenter).remove(indexCityToMove);
+			vectorsDistanceUserCenter.get(userCenter).add(indexCityToMove, hypotenuse);
+		}
 	}
 	
 	public void placeAlgorithmCenters(int k)
 	{
-		deleteMouseListeners();
+//		deleteMouseAndMouseMotionListeners();
 		
 		computingFrame.writeln();
 		computingFrame.writeln();
@@ -257,6 +655,10 @@ public class DrawingArea extends JPanel {
 		}
 		else
 		{
+			if (!citiesCenters.isEmpty())
+			{
+				citiesCenters = new ArrayList<>();
+			}
 			ArrayList<City> remainingCities = (ArrayList<City>) cities.clone();
 			Random random = new Random();
 			int indexFirstCenter = random.nextInt(n);
@@ -322,132 +724,99 @@ public class DrawingArea extends JPanel {
 //		return 2 * lowerBoundOptimalValue / 7;
 //	}
 	
-	public void setDrawingAreaForUserCenters(int k)
+	private void addNewUserCenter(UserCenter newUserCenter)
 	{
-		numberRemaningUserCenter = k;
-		indexUserCenterToMove = -1;
-		computingFrame.writeln(" > Place your " + numberRemaningUserCenter + " centers");
-		setUserMouseListener();
+		double x1 = newUserCenter.getCenterX();
+		double y1 = newUserCenter.getCenterY();
+		if (!newUserCenter.areGoodCoordinates())
+		{
+			computingFrame.writeln(" > Ilegal position. Place another " + numberRemaningUserCenter + " centers.");
+		}
+		else if (userCenters.contains(newUserCenter))
+		{
+			computingFrame.writeln(" > In this position a user center is already present. Place another " + numberRemaningUserCenter + " centers.");
+		}
+		else
+		{
+			numberRemaningUserCenter--;
+			userCenters.add(newUserCenter);
+			ArrayList<Double> distancesFromNewCenter = new ArrayList<>();
+			for (int i = 0; i < cities.size(); i++)
+			{
+				double x2 = cities.get(i).getCenterX();
+				double y2 = cities.get(i).getCenterY();
+				double hypotenuse = Math.sqrt(Math.pow(Math.abs(x1 - x2), 2) + Math.pow(Math.abs(y1 - y2), 2));
+				distancesFromNewCenter.add(hypotenuse);
+			}
+			vectorsDistanceUserCenter.put(newUserCenter, distancesFromNewCenter);
+			repaint();
+			
+			if (numberRemaningUserCenter == 0)
+			{
+				computingFrame.writeln();
+//				computingFrame.writeln("A \"good\" solution is a solution that moves away from the lower bound at most 2/7 of the value of this last one.");
+				computingFrame.writeln();
+				calculateUserSolutionValue();
+//				computingFrame.writeln();
+				computingFrame.writeln(" > Try to move centers to improve your solution. Otherwise, you can move the cities or add others.");
+//				computingFrame.writeln();
+//				computingFrame.writeln();
+				deleteMouseAndMouseMotionListeners();
+				setMoveCitiesAndCentersMouseListener();
+				activeChangeCentersNumber();
+			}
+			else
+			{
+				computingFrame.writeln(" > Place another " + numberRemaningUserCenter + " centers.");
+			}
+		}
 	}
 	
-	private void setUserMouseListener()
+	private boolean getUserCenterToMove(double x, double y)
 	{
-		addMouseListener(new MouseListener()
-				{
-
-					@Override
-					public void mouseClicked(MouseEvent event)
-					{
-						if (numberRemaningUserCenter > 0)
-						{
-							System.out.println("User center inserted, remaining " + numberRemaningUserCenter + " centers");
-							int x = event.getX();
-							int y = event.getY();
-							UserCenter newUserCenter = new UserCenter(x, y, shapeSize, X_SIZE, Y_SIZE);
-							double x1 = newUserCenter.getCenterX();
-							double y1 = newUserCenter.getCenterY();
-							if (newUserCenter.areGoodCoordinates() && !userCenters.contains(newUserCenter))
-							{
-								numberRemaningUserCenter--;
-								userCenters.add(newUserCenter);
-								double[] distancesFromNewCenter = new double[cities.size()];
-								for (int i = 0; i < cities.size(); i++)
-								{
-									double x2 = cities.get(i).getCenterX();
-									double y2 = cities.get(i).getCenterY();
-									double hypotenuse = Math.sqrt(Math.pow(Math.abs(x1 - x2), 2) + Math.pow(Math.abs(y1 - y2), 2));
-									distancesFromNewCenter[i] = hypotenuse;
-								}
-								vectorsDistanceUserCenter.put(newUserCenter, distancesFromNewCenter);
-								repaint();
-							}
-							if (numberRemaningUserCenter == 0)
-							{
-								computingFrame.writeln();
-//								computingFrame.writeln("A \"good\" solution is a solution that moves away from the lower bound at most 2/7 of the value of this last one.");
-								computingFrame.writeln();
-								calculateUserSolutionValue();
-//								computingFrame.writeln();
-								computingFrame.writeln(" > Try to move centers to improve your solution");
-								computingFrame.writeln();
-//								computingFrame.writeln();
-								activeChangeCentersNumber();
-							}
-							else
-							{
-								computingFrame.writeln(" > Place another " + numberRemaningUserCenter + " centers");
-							}
-						}
-					}
-
-					@Override
-					public void mouseEntered(MouseEvent arg0) {
-						// TODO Auto-generated method stub
-						
-					}
-
-					@Override
-					public void mouseExited(MouseEvent arg0) {
-						// TODO Auto-generated method stub
-						
-					}
-
-					@Override
-					public void mousePressed(MouseEvent event)
-					{
-						int x = event.getX();
-						int y = event.getY();
-						System.out.println("PRESSED HERE: " + x + ", " + y);
-//						boolean found = false;
-						indexUserCenterToMove = -1;
-						int i = 0;
-						while (i < userCenters.size() && indexUserCenterToMove == -1)
-						{
-							if (userCenters.get(i).getShape().contains(x, y))
-							{
-								indexUserCenterToMove = i;
-							}
-							i++;
-						}
-					}
-
-					@Override
-					public void mouseReleased(MouseEvent event)
-					{
-						int x = event.getX();
-						int y = event.getY();
-						System.out.println("RELEASED HERE: " + x + ", " + y);
-						if (indexUserCenterToMove >= 0)
-						{
-							ArrayList<UserCenter> otherUserCenters = (ArrayList<UserCenter>) userCenters.clone();
-							otherUserCenters.remove(indexUserCenterToMove);
-							boolean isChanged = userCenters.get(indexUserCenterToMove).changePosition(x, y, otherUserCenters);
-							if (isChanged)
-							{
-								System.out.println("BEFORE MOVE, vectors distance size: " + vectorsDistanceUserCenter.size());
-								UserCenter movedUserCenter = userCenters.get(indexUserCenterToMove);
-								double x1 = movedUserCenter.getCenterX();
-								double y1 = movedUserCenter.getCenterY();
-								double[] distancesFromMovedCenter = new double[cities.size()];
-								for (int i = 0; i < cities.size(); i++)
-								{
-									double x2 = cities.get(i).getCenterX();
-									double y2 = cities.get(i).getCenterY();
-									double hypotenuse = Math.sqrt(Math.pow(Math.abs(x1 - x2), 2) + Math.pow(Math.abs(y1 - y2), 2));
-									distancesFromMovedCenter[i] = hypotenuse;
-								}
-								vectorsDistanceUserCenter.put(movedUserCenter, distancesFromMovedCenter);
-								System.out.println("AFTER MOVE, vectors distance size: " + vectorsDistanceUserCenter.size());
-								repaint();
-								if (numberRemaningUserCenter == 0)
-								{
-									calculateUserSolutionValue();
-								}
-							}
-						}
-					}
-			
-				});
+		boolean found = false;
+		indexUserCenterToMove = -1;
+		int i = 0;
+		while (i < userCenters.size() && indexUserCenterToMove == -1)
+		{
+			if (userCenters.get(i).getShape().contains(x, y))
+			{
+				indexUserCenterToMove = i;
+				found = true;
+			}
+			i++;
+		}
+		return found;
+	}
+	
+	private void moveUserCenterTo(double x, double y) throws IllegalPositionException, DuplicatePlaceException
+	{
+		draggedUserCenter = null;
+		if (indexUserCenterToMove >= 0)
+		{
+			ArrayList<UserCenter> otherUserCenters = (ArrayList<UserCenter>) userCenters.clone();
+			otherUserCenters.remove(indexUserCenterToMove);
+			userCenters.get(indexUserCenterToMove).changePosition(x, y, otherUserCenters);
+			System.out.println("BEFORE MOVE, vectors distance size: " + vectorsDistanceUserCenter.size());
+			UserCenter movedUserCenter = userCenters.get(indexUserCenterToMove);
+			double x1 = movedUserCenter.getCenterX();
+			double y1 = movedUserCenter.getCenterY();
+			ArrayList<Double> distancesFromMovedCenter = new ArrayList<>();
+			for (int i = 0; i < cities.size(); i++)
+			{
+				double x2 = cities.get(i).getCenterX();
+				double y2 = cities.get(i).getCenterY();
+				double hypotenuse = Math.sqrt(Math.pow(Math.abs(x1 - x2), 2) + Math.pow(Math.abs(y1 - y2), 2));
+				distancesFromMovedCenter.add(hypotenuse);
+			}
+			vectorsDistanceUserCenter.put(movedUserCenter, distancesFromMovedCenter);
+			System.out.println("AFTER MOVE, vectors distance size: " + vectorsDistanceUserCenter.size());
+			repaint();
+			if (numberRemaningUserCenter == 0)
+			{
+				calculateUserSolutionValue();
+			}
+		}
 	}
 	
 	private void calculateUserSolutionValue()
@@ -461,12 +830,12 @@ public class DrawingArea extends JPanel {
 		int indexMaxCityDist = -1;
 		for (UserCenter userCenter: userCenters)
 		{
-			double[] distances = vectorsDistanceUserCenter.get(userCenter);
-			for (int i = 0; i < distances.length; i++)
+			ArrayList<Double> distances = vectorsDistanceUserCenter.get(userCenter);
+			for (int i = 0; i < distances.size(); i++)
 			{
-				if (Double.isNaN(minCitiesDistances[i]) || distances[i] < minCitiesDistances[i])
+				if (Double.isNaN(minCitiesDistances[i]) || distances.get(i) < minCitiesDistances[i])
 				{
-					minCitiesDistances[i] = distances[i];
+					minCitiesDistances[i] = distances.get(i);
 				}
 			}
 		}
@@ -480,13 +849,13 @@ public class DrawingArea extends JPanel {
 		}
 		System.out.println("User solution: " + solution);
 		computingFrame.writeln("Your solution: " + solution);
-		computingFrame.writeln();
+//		computingFrame.writeln();
 //		if (solution <= lowerBoundOptimalValue + goodGap)
 //		{
 //			computingFrame.writeln("GREAT! You found a \"good\" solution.");
 //			computingFrame.writeln();
 //		}
-	}
+	} 	//END METHODS USED BY MOUSE LISTENERS
 
 //	@Override
 //	public Dimension getPreferredSize()
@@ -569,6 +938,34 @@ public class DrawingArea extends JPanel {
 			g2.drawString(String.valueOf(i + 1), (int) (uc.getX() + constantForNumberBasepointX), (int) (uc.getY() + constantForNumberBasepointY));
 		}
 		
+		
+		
+		if (draggedCity != null)
+		{
+			g2.setColor(cityColor);
+			g2.fill(draggedCity.getShape());
+			
+			/* Draw city number */
+			g2.setColor(numberCityColor);
+			g2.setFont(NUMBER_FONT);
+			g2.drawString(String.valueOf(indexCityToMove + 1), (int) (draggedCity.getX() + constantForNumberBasepointX), (int) (draggedCity.getY() + constantForNumberBasepointY));
+			
+			draggedCity = null;
+		}
+		
+		if (draggedUserCenter != null)
+		{
+			g2.setColor(userCenterColor);
+			g2.fill(draggedUserCenter.getShape());
+			
+			/* Draw user center number */
+			g2.setColor(numberUserCenterColor);
+			g2.setFont(NUMBER_FONT);
+			g2.drawString(String.valueOf(indexUserCenterToMove + 1), (int) (draggedUserCenter.getX() + constantForNumberBasepointX), (int) (draggedUserCenter.getY() + constantForNumberBasepointY));
+			
+			draggedUserCenter = null;
+		}
+		
 	}
 	
 	public int getCitiesNumber()
@@ -617,13 +1014,16 @@ public class DrawingArea extends JPanel {
 	private ArrayList<City> cities;
 	private ArrayList<City> citiesCenters;
 //	private int numCities;
+	private int indexCityToMove;
+	private City draggedCity;
 	
 	private ArrayList<UserCenter> userCenters;
 	private int numberRemaningUserCenter;
 	private int indexUserCenterToMove;
+	private UserCenter draggedUserCenter;
 	
 	private HashMap<City, ArrayList<Double>> vectorsDistance;
-	private HashMap<UserCenter, double[]> vectorsDistanceUserCenter;
+	private HashMap<UserCenter, ArrayList<Double>> vectorsDistanceUserCenter;
 	
 	private double lowerBoundOptimalValue;
 //	private double goodGap;
