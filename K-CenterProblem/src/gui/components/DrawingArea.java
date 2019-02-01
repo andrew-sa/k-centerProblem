@@ -395,7 +395,7 @@ public class DrawingArea extends JPanel {
 						addNewCity(city);
 						placeAlgorithmCenters(citiesCenters.size());
 						calculateUserSolutionValue();
-						computingFrame.writeln(" > Try to move centers to improve your solution. Otherwise, you can move the cities or add others.");
+						computingFrame.writeln(" > Try to move centers to improve your solution.\n" + "     Otherwise, you can move the cities or add others.");
 					}
 					catch (IllegalPositionException e)
 					{
@@ -460,7 +460,7 @@ public class DrawingArea extends JPanel {
 						moveCityTo(x, y);
 						placeAlgorithmCenters(citiesCenters.size());
 						calculateUserSolutionValue();
-						computingFrame.writeln(" > Try to move centers to improve your solution. Otherwise, you can move the cities or add others.");
+						computingFrame.writeln(" > Try to move centers to improve your solution.\n" + "     Otherwise, you can move the cities or add others.");
 					}
 					catch (IllegalPositionException e)
 					{
@@ -739,7 +739,7 @@ public class DrawingArea extends JPanel {
 				computingFrame.writeln();
 				calculateUserSolutionValue();
 //				computingFrame.writeln();
-				computingFrame.writeln(" > Try to move centers to improve your solution. Otherwise, you can move the cities or add others.");
+				computingFrame.writeln(" > Try to move centers to improve your solution.\n" + "     Otherwise, you can move the cities or add others.");
 //				computingFrame.writeln();
 //				computingFrame.writeln();
 				deleteMouseAndMouseMotionListeners();
@@ -925,7 +925,7 @@ public class DrawingArea extends JPanel {
 	
 	/* CALCULTE USER SOLUTION */
 	/**
-	 * This method calculates the user solution according to place of the user centers.
+	 * This method calculates the user solution according to the user centers placed.
 	 */
 	private void calculateUserSolutionValue()
 	{
