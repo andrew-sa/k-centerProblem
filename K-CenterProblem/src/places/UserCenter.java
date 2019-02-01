@@ -6,6 +6,11 @@ import java.util.ArrayList;
 import places.exceptions.DuplicatePlaceException;
 import places.exceptions.IllegalPositionException;
 
+/**
+ * This class represents a center.
+ * @author Andrea Mogavero
+ *
+ */
 public class UserCenter extends AlgorithmPlace {
 
 	public UserCenter(double x, double y, double shapeSize, int xSize, int ySize)
@@ -14,6 +19,9 @@ public class UserCenter extends AlgorithmPlace {
 		shape = new Rectangle2D.Double(super.getX(), super.getY(), shapeSize, shapeSize);
 	}
 	
+	/**
+	 * @return true if this and otherObject overlap, otherwise false. 
+	 */
 	@Override
 	public boolean equals(Object otherObject)
 	{
@@ -34,6 +42,14 @@ public class UserCenter extends AlgorithmPlace {
 		this.shape = shape;
 	}
 
+	/**
+	 * This method changes the coordinates of the user center.
+	 * @param x the new x-coordinate.
+	 * @param y the new y-coordinate
+	 * @param otherUserCenters The other user center located in the drawing area.
+	 * @throws IllegalPositionException if the moved user center steps outside of the drawing area.
+	 * @throws DuplicatePlaceException if the moved user center overlap another user center.
+	 */
 	public void changePosition(double x, double y, ArrayList<UserCenter> otherUserCenters) throws IllegalPositionException, DuplicatePlaceException
 	{
 		double prevX = super.getX();

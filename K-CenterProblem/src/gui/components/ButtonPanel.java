@@ -9,6 +9,11 @@ import javax.swing.JPanel;
 
 import custom.events.ActiveChangeCentersNumberListener;
 
+/**
+ * This panel contains the buttons used by the user during the interaction.
+ * @author Andrea Mogavero
+ *
+ */
 public class ButtonPanel extends JPanel implements ActiveChangeCentersNumberListener {
 
 	public ButtonPanel(DrawingArea drawingArea)
@@ -29,6 +34,9 @@ public class ButtonPanel extends JPanel implements ActiveChangeCentersNumberList
 		addButtonsListener();
 	}
 	
+	/**
+	 * This method adds a listener to each button.
+	 */
 	private void addButtonsListener()
 	{
 		buttonInsertK.addActionListener(new ActionListener()

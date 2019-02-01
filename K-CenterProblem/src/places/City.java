@@ -6,6 +6,11 @@ import java.util.ArrayList;
 import places.exceptions.DuplicatePlaceException;
 import places.exceptions.IllegalPositionException;
 
+/**
+ * This class represents a city.
+ * @author Andrea Mogavero
+ *
+ */
 public class City extends AlgorithmPlace {
 
 	public City(double x, double y, double shapeSize, int xSize, int ySize)
@@ -14,6 +19,9 @@ public class City extends AlgorithmPlace {
 		shape = new Ellipse2D.Double(super.getX(), super.getY(), shapeSize, shapeSize);
 	}
 	
+	/**
+	 * @return true if this and otherObject overlap, otherwise false. 
+	 */
 	@Override
 	public boolean equals(Object otherObject)
 	{
@@ -34,6 +42,14 @@ public class City extends AlgorithmPlace {
 		this.shape = shape;
 	}
 	
+	/**
+	 * This method changes the coordinates of the city.
+	 * @param x the new x-coordinate.
+	 * @param y the new y-coordinate
+	 * @param otherCities The other cities located in the drawing area.
+	 * @throws IllegalPositionException if the moved city steps outside of the drawing area.
+	 * @throws DuplicatePlaceException if the moved city overlap another city.
+	 */
 	public void changePosition(double x, double y, ArrayList<City> otherCities) throws IllegalPositionException, DuplicatePlaceException
 	{
 		double prevX = super.getX();

@@ -1,5 +1,10 @@
 package places;
 
+/**
+ * This class represents a place (city or center) positioned by the user.
+ * @author Andrea Mogavero
+ *
+ */
 public abstract class AlgorithmPlace {
 	
 	public AlgorithmPlace(double x, double y, double centerX, double centerY, double shapeSize, int xSize, int ySize)
@@ -13,6 +18,9 @@ public abstract class AlgorithmPlace {
 		this.ySize = ySize;
 	}
 	
+	/**
+	 * @return true if this and otherObject overlap, otherwise false. 
+	 */
 	@Override
 	public boolean equals(Object otherObject)
 	{
@@ -44,6 +52,10 @@ public abstract class AlgorithmPlace {
 		}
 	}
 	
+	/**
+	 * This method checks if the place is contained in the drawing area.
+	 * @return true if is contained, otherwise flae.
+	 */
 	public boolean areGoodCoordinates()
 	{
 		if ((x + shapeSize <= xSize) && (y + shapeSize <= ySize) && x >= 0 && y >= 0)

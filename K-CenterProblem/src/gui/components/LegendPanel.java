@@ -8,6 +8,11 @@ import java.awt.geom.Rectangle2D;
 
 import javax.swing.JPanel;
 
+/**
+ * This panel contains the legend.
+ * @author Andrea Mogavero
+ *
+ */
 public class LegendPanel extends JPanel {
 	
 	public LegendPanel(double shapeSize, Color cityColor, Color centerColor, Color firstCenterColor,

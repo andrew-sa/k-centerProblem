@@ -1,5 +1,10 @@
 package places.exceptions;
 
+/**
+ * This exception occurs when the user tries to place a city/center outside the drawing area.
+ * @author Andrea Mogavero
+ *
+ */
 public class IllegalPositionException extends Exception {
 
 	public IllegalPositionException() {

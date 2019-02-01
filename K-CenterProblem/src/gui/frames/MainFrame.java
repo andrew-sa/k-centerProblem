@@ -8,6 +8,11 @@ import javax.swing.JFrame;
 import gui.components.ButtonPanel;
 import gui.components.DrawingArea;
 
+/**
+ * This frame contains the drawing area and the button panel.
+ * @author Andrea Mogavero
+ *
+ */
 public class MainFrame extends JFrame {
 	
 //	public MainFrame(double shapeSize, ComputingFrame computingFrame) /* OLD CONSTRUCTOR */

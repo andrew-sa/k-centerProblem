@@ -9,6 +9,11 @@ import javax.swing.JTextArea;
 
 import gui.components.LegendPanel;
 
+/**
+ * This frame contains: the text area that shows messages to user, and the legend panel.
+ * @author Andrea Mogavero
+ *
+ */
 public class ComputingFrame extends JFrame {
 	
 //	public ComputingFrame(double shapeSize)
@@ -52,36 +57,56 @@ public class ComputingFrame extends JFrame {
 		getContentPane().add(legendPanel);
 	}
 
+	/**
+	 * Delete the text of the text area.
+	 */
 	public void clear()
 	{
 		textArea.setText(null);
 		scrollDown();
 	}
 	
+	/**
+	 * Write the string in the text area.
+	 * @param str the string to write
+	 */
 	public void write(String str)
 	{
 		textArea.append(str);
 		scrollDown();
 	}
 	
+	/**
+	 *  Write the string and new line in the text area.
+	 * @param str the string to write
+	 */
 	public void writeln(String str)
 	{
 		textArea.append(str + "\n");
 		scrollDown();
 	}
 	
+	/**
+	 * Write a new line in the text area.
+	 */
 	public void writeln()
 	{
 		textArea.append("\n");
 		scrollDown();
 	}
 	
+	/**
+	 * Write the separator in the text area.
+	 */
 	public void writeSeparator()
 	{
 		textArea.append("\t- - - - - - - - - - - - - - - - - - -");
 		scrollDown();
 	}
 	
+	/**
+	 * Scroll down the text area.
+	 */
 	private void scrollDown()
 	{
 		textArea.setCaretPosition(textArea.getText().length());

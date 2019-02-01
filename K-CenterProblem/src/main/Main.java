@@ -10,6 +10,11 @@ import javax.swing.JOptionPane;
 import gui.frames.ComputingFrame;
 import gui.frames.MainFrame;
 
+/**
+ * This class launches the program
+ * @author Andrea Mogavero
+ *
+ */
 public class Main {
 
 //	public static void main(String[] args)
