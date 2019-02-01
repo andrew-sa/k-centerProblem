@@ -131,8 +131,8 @@ public abstract class AlgorithmPlace {
 	/**
 	 * @param shapeSize the shapeSize to set
 	 */
-	public void setShapeSize(double citySize) {
-		this.shapeSize = citySize;
+	public void setShapeSize(double shapeSize) {
+		this.shapeSize = shapeSize;
 	}
 
 	/**
