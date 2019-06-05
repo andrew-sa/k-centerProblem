@@ -33,7 +33,7 @@ public class DrawingArea extends JPanel {
 	{
 		this.shapeSize = citySize;
 		this.computingFrame = computingFrame;
-		
+//		
 		setBackground(new Color(215, 215, 193));
 		setBorder(BorderFactory.createLineBorder(Color.black));
 		this.cityColor = cityColor;

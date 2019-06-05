@@ -19,7 +19,7 @@ public class ButtonPanel extends JPanel implements ActiveChangeCentersNumberList
 	public ButtonPanel(DrawingArea drawingArea)
 	{
 		k = 0;
-		
+//		
 		this.drawingArea = drawingArea;
 		buttonInsertK = new JButton(INITIAL_TEXT_BUTTON_K);
 //		buttonInsertUserCenters = new JButton();
