@@ -24,11 +24,16 @@ public class ButtonPanel extends JPanel implements ActiveChangeCentersNumberList
 		buttonInsertK = new JButton(INITIAL_TEXT_BUTTON_K);
 //		buttonInsertUserCenters = new JButton();
 		buttonReset = new JButton("Reset");
+		buttonToggleDelete = new JButton("Delete cities");
+		buttonToggleDelete.setEnabled(false);
+		
+		isDeleteMode = false;
 		
 //		buttonInsertUserCenters.setEnabled(false);
 //		buttonInsertUserCenters.setVisible(false);
 		
 		add(buttonInsertK);
+		add(buttonToggleDelete);
 //		add(buttonInsertUserCenters);
 		add(buttonReset);
 		addButtonsListener();
@@ -95,10 +100,35 @@ public class ButtonPanel extends JPanel implements ActiveChangeCentersNumberList
 			{
 				buttonInsertK.setText(INITIAL_TEXT_BUTTON_K);
 				buttonInsertK.setEnabled(true);
+				buttonToggleDelete.setEnabled(false);
 //				buttonInsertK.setVisible(true);
 //				buttonInsertUserCenters.setEnabled(false);
 //				buttonInsertUserCenters.setVisible(false);
 				drawingArea.reset();
+			}
+			
+		});
+		
+		
+		buttonToggleDelete.addActionListener(new ActionListener() 
+		{
+	
+			@Override
+			public void actionPerformed(ActionEvent e)
+			{
+				if (isDeleteMode)
+				{
+					buttonToggleDelete.setText("Delete cities");
+					isDeleteMode = false;
+					drawingArea.unsetDrawingDeleteCities();
+				}
+				else
+				{
+					buttonToggleDelete.setText("Back to normal mode");
+					isDeleteMode = true;
+					drawingArea.setDrawingDeleteCities();
+				}
+				
 			}
 			
 		});
@@ -109,13 +139,16 @@ public class ButtonPanel extends JPanel implements ActiveChangeCentersNumberList
 	{
 		buttonInsertK.setText(CHANGED_TITLE_BUTTOM_K);
 		buttonInsertK.setEnabled(true);
+		buttonToggleDelete.setEnabled(true);
 	}
 
 	private final static String INITIAL_TEXT_BUTTON_K = "INSERT Number of Centers";
 	private final static String CHANGED_TITLE_BUTTOM_K = "CHANGE Number of Centers";
 	private JButton buttonInsertK;
 	private JButton buttonReset;
+	private JButton buttonToggleDelete;
 //	private JButton buttonInsertUserCenters;
 	private DrawingArea drawingArea;
 	private int k;
+	private boolean isDeleteMode;
 }

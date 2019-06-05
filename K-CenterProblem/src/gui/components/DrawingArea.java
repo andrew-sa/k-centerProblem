@@ -527,7 +527,72 @@ public class DrawingArea extends JPanel {
 			}
 			
 		});
-	} 	//END SETTERS LISTENER
+	}
+	
+	private void setDeleteCitiesListener()
+	{
+		addMouseListener(new MouseListener()
+		{
+			@Override
+			public void mouseClicked(MouseEvent event) //Only city
+			{
+				double x = event.getX();
+				double y = event.getY();
+				if (getCityToMove(x, y)) {
+					for (int i=0; i<cities.size(); i++) {
+						vectorsDistance.get(cities.get(i)).remove(indexCityToMove);
+					}
+					vectorsDistance.remove(cities.get(indexCityToMove));
+					cities.remove(indexCityToMove);
+					for (int i=0; i<userCenters.size(); i++) {
+						vectorsDistanceUserCenter.get(userCenters.get(i)).remove(indexCityToMove);
+					}
+					indexCityToMove=-1;
+					placeAlgorithmCenters(citiesCenters.size());
+					calculateUserSolutionValue();
+					computingFrame.writeln(" > City removed.");
+				}
+						
+			}
+
+			@Override
+			public void mousePressed(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseReleased(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseEntered(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+
+			@Override
+			public void mouseExited(MouseEvent e) {
+				// TODO Auto-generated method stub
+				
+			}
+		});
+	}
+	
+	public void setDrawingDeleteCities()
+	{
+		deleteMouseAndMouseMotionListeners();
+		setDeleteCitiesListener();
+	}
+	
+	public void unsetDrawingDeleteCities()
+	{
+		deleteMouseAndMouseMotionListeners();
+		setMoveCitiesAndCentersMouseListener();
+	}
+	//END SETTERS LISTENER
 	
 	/* METHODS USED BY MOUSE LISTENERS */
 	/**
