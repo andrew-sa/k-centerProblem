@@ -61,6 +61,12 @@ public class ButtonPanel extends JPanel implements ActiveChangeCentersNumberList
 				{
 					buttonInsertK.setEnabled(false);
 					
+					/* Back to the normal mode */
+					buttonToggleDelete.setText("Delete cities");
+					buttonToggleDelete.setEnabled(false);
+					isDeleteMode = false;
+//					drawingArea.unsetDrawingDeleteCities();		//It's unless because at line 82 this method calls drawingArea.setDrawingAreaForUserCenters(k) that provide to delete and, then, set the correct mouse listeners 
+					
 					if (buttonInsertK.getText().equals(CHANGED_TITLE_BUTTOM_K))
 					{
 						drawingArea.deleteSolution();

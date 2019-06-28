@@ -529,6 +529,9 @@ public class DrawingArea extends JPanel {
 		});
 	}
 	
+	/**
+	 * This method sets the mouse listener and mouse motion listener to delete existing cities.
+	 */
 	private void setDeleteCitiesListener()
 	{
 		addMouseListener(new MouseListener()
@@ -538,19 +541,28 @@ public class DrawingArea extends JPanel {
 			{
 				double x = event.getX();
 				double y = event.getY();
-				if (getCityToMove(x, y)) {
-					for (int i=0; i<cities.size(); i++) {
+				if (getCityToMove(x, y))
+				{
+					for (int i = 0; i < cities.size(); i++)
+					{
 						vectorsDistance.get(cities.get(i)).remove(indexCityToMove);
 					}
 					vectorsDistance.remove(cities.get(indexCityToMove));
 					cities.remove(indexCityToMove);
-					for (int i=0; i<userCenters.size(); i++) {
+					for (int i = 0; i < userCenters.size(); i++)
+					{
 						vectorsDistanceUserCenter.get(userCenters.get(i)).remove(indexCityToMove);
 					}
-					indexCityToMove=-1;
+					indexCityToMove = -1;
+					computingFrame.writeln();
+					computingFrame.writeln();
+					computingFrame.writeSeparator();
+					computingFrame.writeln();
+					computingFrame.writeln();
+					computingFrame.writeln();
+					computingFrame.writeln(" > City has been removed.");
 					placeAlgorithmCenters(citiesCenters.size());
 					calculateUserSolutionValue();
-					computingFrame.writeln(" > City removed.");
 				}
 						
 			}
@@ -581,12 +593,18 @@ public class DrawingArea extends JPanel {
 		});
 	}
 	
+	/**
+	 * This method sets drawing area listeners when the user enable cities remove mode.
+	 */
 	public void setDrawingDeleteCities()
 	{
 		deleteMouseAndMouseMotionListeners();
 		setDeleteCitiesListener();
 	}
 	
+	/**
+	 * This method sets drawing area listeners when the user disable cities remove mode to return to the normal mode.
+	 */
 	public void unsetDrawingDeleteCities()
 	{
 		deleteMouseAndMouseMotionListeners();
